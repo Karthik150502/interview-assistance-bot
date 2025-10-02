@@ -16,12 +16,12 @@ export function CandidateDetails({ candidate }: CandidateDetailsProps) {
           <div className="flex items-start justify-between">
             <div>
               <CardTitle className="text-2xl">{candidate.name}</CardTitle>
-              <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
+              <div className="flex-col items-start gap-4 mt-2 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1 py-1">
                   <Mail className="h-4 w-4" />
                   {candidate.email}
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1 py-1">
                   <Phone className="h-4 w-4" />
                   {candidate.phone}
                 </div>
@@ -36,26 +36,25 @@ export function CandidateDetails({ candidate }: CandidateDetailsProps) {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex items-center gap-2 text-sm">
+          <div className="flex-col items-start gap-4">
+            <div className="flex items-center gap-2 text-sm py-1">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">Started:</span>
               <span>{candidate.startedAt ? new Date(candidate.startedAt).toLocaleString() : "N/A"}</span>
             </div>
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-2 text-sm py-1">
               <Clock className="h-4 w-4 text-muted-foreground" />
               <span className="text-muted-foreground">Completed:</span>
               <span>{candidate.completedAt ? new Date(candidate.completedAt).toLocaleString() : "N/A"}</span>
             </div>
+            {candidate.resumeFileName && (
+              <div className="flex items-center gap-2 text-sm">
+                <FileText className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">Resume:</span>
+                <span>{candidate.resumeFileName}</span>
+              </div>
+            )}
           </div>
-
-          {candidate.resumeFileName && (
-            <div className="flex items-center gap-2 text-sm">
-              <FileText className="h-4 w-4 text-muted-foreground" />
-              <span className="text-muted-foreground">Resume:</span>
-              <span>{candidate.resumeFileName}</span>
-            </div>
-          )}
 
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground">Status:</span>

@@ -2,11 +2,10 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useTransition } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,20 +14,39 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
+
+
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage
+} from '@/components/ui/form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useInterviewStore } from "@/lib/store"
 import { Upload, Loader2 } from "lucide-react"
+import { UserDetailsSchema } from "@/lib/schema/zod"
+import { useForm } from "react-hook-form"
+import z from "zod"
 
 export function ResumeUpload() {
   const { createCandidate, updateCandidateInfo, currentCandidate } = useInterviewStore()
-  const [file, setFile] = useState<File | null>(null)
+  const [file, setFile] = useState<File | null>(null);
+  const [isPending, startTransition] = useTransition();
   const [isProcessing, setIsProcessing] = useState(false)
   const [manualEntry, setManualEntry] = useState(false)
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-  })
+
+  const form = useForm<z.infer<typeof UserDetailsSchema>>({
+    resolver: zodResolver(UserDetailsSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      phone: "",
+    }
+  });
   const [alertDialog, setAlertDialog] = useState<{
     open: boolean
     title: string
@@ -42,6 +60,7 @@ export function ResumeUpload() {
   const showAlert = (title: string, description: string) => {
     setAlertDialog({ open: true, title, description })
   }
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -75,14 +94,9 @@ export function ResumeUpload() {
       } else {
         // Missing info, show manual entry
         setManualEntry(true)
-        setFormData({
-          name: data.name || "",
-          email: data.email || "",
-          phone: data.phone || "",
-        })
         createCandidate(data.name || "", data.email || "", data.phone || "", file.name)
       }
-    } catch (error) {
+    } catch {
       showAlert("Processing Error", "Error processing resume. Please enter your details manually.")
       setManualEntry(true)
     } finally {
@@ -90,17 +104,14 @@ export function ResumeUpload() {
     }
   }
 
-  const handleManualSubmit = () => {
-    if (!formData.name || !formData.email || !formData.phone) {
-      showAlert("Missing Information", "Please fill in all fields")
-      return
-    }
-
-    if (currentCandidate) {
-      updateCandidateInfo(formData.name, formData.email, formData.phone)
-    } else {
-      createCandidate(formData.name, formData.email, formData.phone)
-    }
+  const handleManualSubmit = (values: z.infer<typeof UserDetailsSchema>) => {
+    startTransition(() => {
+      if (currentCandidate) {
+        updateCandidateInfo(values.name, values.email, values.phone)
+      } else {
+        createCandidate(values.name, values.email, values.phone)
+      }
+    });
   }
 
   if (
@@ -114,43 +125,96 @@ export function ResumeUpload() {
             <CardTitle>Complete Your Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="John Doe"
-              />
-            </div>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(handleManualSubmit)} className='space-y-6'>
+                <div className='space-y-4'>
+                  <FormField
+                    control={form.control}
+                    name='name'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Name</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            disabled={isPending}
+                            placeholder='Steve Rogers'
+                            type="text"
+                            autoComplete="name"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name='email'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <div className='w-full bg-red h-full relative'>
+                            <Input
+                              {...field}
+                              disabled={isPending}
+                              placeholder='(e.g. steverogers11545@gmail.com)'
+                              type={"email"}
+                              autoComplete="email"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                placeholder="john@example.com"
-              />
-            </div>
+                      </FormItem>
+                    )}
+                  />
 
-            <div className="space-y-2">
-              <Label htmlFor="phone">Phone Number *</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                placeholder="+1 234 567 8900"
-              />
+                  <FormField
+                    control={form.control}
+                    name='phone'
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Phone</FormLabel>
+                        <FormControl>
+                          <div className='w-full bg-red h-full relative'>
+                            <Input
+                              {...field}
+                              disabled={isPending}
+                              type={"text"}
+                              placeholder="(e.g. +91 98765 43210)"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <Button type="submit" disabled={isPending} className='w-full'>
+                  {isPending && (
+                    <>
+                      <Loader2 className='animate-spin mr-2' size={18} />
+                      <span>Submitting</span>
+                    </>
+                  )}
+                  {!isPending && <span>Continue</span>}
+                </Button>
+              </form>
+            </Form>
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-background px-2 text-muted-foreground">Or</span>
+              </div>
             </div>
-
-            <Button onClick={handleManualSubmit} className="w-full">
-              Continue
+            <Button variant={"secondary"} disabled={isPending} className='w-full' onClick={() => setManualEntry(false)}>
+              Upload Resume
             </Button>
           </CardContent>
-        </Card>
+        </Card >
 
         <AlertDialog open={alertDialog.open} onOpenChange={(open) => setAlertDialog({ ...alertDialog, open })}>
           <AlertDialogContent>

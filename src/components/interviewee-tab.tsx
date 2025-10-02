@@ -10,6 +10,9 @@ import { ChatMessage } from "@/components/chat-message"
 import { QuestionTimer } from "@/components/question-timer"
 import { Progress } from "@/components/ui/progress"
 import { Loader2 } from "lucide-react"
+import Editdetails from "./edit-details"
+import { UserDetailsSchema } from "@/lib/schema/zod"
+import z from "zod"
 
 export function IntervieweeTab() {
   const {
@@ -20,6 +23,7 @@ export function IntervieweeTab() {
     nextQuestion,
     completeInterview,
     updateTimerState,
+    updateCandidateInfo
   } = useInterviewStore()
 
   const [currentAnswer, setCurrentAnswer] = useState("")
@@ -30,6 +34,7 @@ export function IntervieweeTab() {
   const isSubmittingRef = useRef(false)
   const currentQuestionIdRef = useRef<string | null>(null)
   const currentCandidateIdRef = useRef<string | null>(null)
+  const [editDetails, showEditDetailsModal] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -113,6 +118,17 @@ export function IntervieweeTab() {
 
   const handleGenerateQuestions = async () => {
     if (!currentCandidate) return
+
+    const results = UserDetailsSchema.safeParse({
+      name: currentCandidate.name,
+      email: currentCandidate.email,
+      phone: currentCandidate.phone
+    });;
+
+    if (!results.success) {
+      showEditDetailsModal(true);
+      return
+    }
 
     setIsGenerating(true)
     addMessage({
@@ -271,7 +287,18 @@ export function IntervieweeTab() {
               <strong>Phone:</strong> {currentCandidate.phone}
             </p>
           </div>
-
+          <Editdetails
+            setOpenModal={showEditDetailsModal}
+            openModal={editDetails}
+            values={{
+              name: currentCandidate.name,
+              email: currentCandidate.email,
+              phone: currentCandidate.phone
+            }}
+            updateCandidate={(values: z.infer<typeof UserDetailsSchema>) => {
+              updateCandidateInfo(values.name, values.email, values.phone)
+            }}
+          />
           <div className="bg-muted p-4 rounded-lg space-y-2">
             <h3 className="font-semibold">Interview Format:</h3>
             <ul className="text-sm space-y-1 list-disc list-inside">
