@@ -7,7 +7,7 @@ export async function pdfParser(fileBuffer: Buffer<ArrayBuffer>): Promise<string
 
     return new Promise((resolve, reject) => {
         pdfParser.on("pdfParser_dataError", (err) => {
-            reject(err?.parserError.message || "PDF parse error");
+            reject(err || "PDF parse error");
         });
 
         pdfParser.on("pdfParser_dataReady", (pdfData) => {

@@ -1,3 +1,5 @@
+import { EvaluationType } from "@/app/types";
+import { Question } from "@/lib/store"
 import { type NextRequest, NextResponse } from "next/server"
 import OpenAI from "openai"
 
@@ -7,7 +9,7 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { questions, answers } = await request.json()
+    const { questions, answers } = await request.json();
 
     if (!process.env.OPENAI_API_KEY) {
       console.warn("OPENAI_API_KEY not configured, using fallback evaluation")
@@ -15,9 +17,9 @@ export async function POST(request: NextRequest) {
     }
 
     const qaText = questions
-      .map((q: any, index: number) => {
+      .map((q: Question, index: number) => {
         const answer = answers[index]
-        return `Question ${index + 1} (${q.difficulty}): ${q.text}\nAnswer: ${answer?.text || "No answer provided"}\nTime spent: ${answer?.timeSpent || 0}s / ${q.timeLimit}s`
+        return `Question ${index + 1} (${q.difficulty}): ${q.text}\nAnswer: ${answer?.answer || "No answer provided"}\nTime spent: ${answer?.timeSpent || 0}s / ${q.timeLimit}s`
       })
       .join("\n\n")
 
@@ -38,10 +40,10 @@ Analyze the candidate's responses and provide:
 
 Be fair but thorough. Consider answer quality, completeness, and time management.
 
-Return your response in this EXACT Json format, don't include any bad control character in string literal:
+Return your response in this EXACT Json format, strictly don't include any bad control characters in string literal in the returned response:
 {
-  "score": "score",
-  "summary": "detailed summary here"
+  "score": string,
+  "summary": string
 }`,
         },
         {
@@ -58,11 +60,11 @@ Return your response in this EXACT Json format, don't include any bad control ch
       throw new Error("No content received from OpenAI")
     }
 
-    const evaluation = JSON.parse(content)
+    const evaluation: EvaluationType = JSON.parse(content)
 
     return NextResponse.json({
       score: evaluation.score,
-      summary: evaluation.summary,
+      summary: JSON.stringify(evaluation.summary),
     })
   } catch (error) {
     console.error("Error evaluating answers:", error)

@@ -10,61 +10,61 @@ export async function POST(request: NextRequest) {
   try {
     const { candidateName } = await request.json()
 
-    //   if (!process.env.OPENAI_API_KEY) {
-    //     console.warn("OPENAI_API_KEY not configured, using fallback questions")
-    //     return NextResponse.json({ questions: getFallbackQuestions() })
-    //   }
+    if (!process.env.OPENAI_API_KEY) {
+      console.warn("OPENAI_API_KEY not configured, using fallback questions")
+      return NextResponse.json({ questions: getFallbackQuestions() })
+    }
 
-    //   const completion = await openai.chat.completions.create({
-    //     model: "gpt-3.5-turbo",
-    //     messages: [
-    //       {
-    //         role: "system",
-    //         content: `You are an expert technical interviewer specializing in React and Node.js.
-    // Generate 6 coding interview questions with the following distribution:
-    // - 2 Easy questions (20 seconds each) - Basic concepts (One Line or Word Answers)
-    // - 2 Medium questions (60 seconds each) - Intermediate concepts (One Line or Word Answers)
-    // - 2 Hard questions (120 seconds each) - Advanced concepts (One Liner or Pratical Questions)
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert technical interviewer specializing in React and Node.js.
+    Generate 6 coding interview questions with the following distribution:
+    - 2 Easy questions (20 seconds each) - Basic concepts (One Line or Word Answers)
+    - 2 Medium questions (60 seconds each) - Intermediate concepts (One Line or Word Answers)
+    - 2 Hard questions (120 seconds each) - Advanced concepts (One Liner or Pratical Questions)
 
-    // The questions must be designed so that the answer can be given in **one line or a single word**. Avoid long explanations or multi-step solutions. Focus on practical, testable React and Node.js topics.
+    The questions must be designed so that the answer can be given in **one line or a single word**. Avoid long explanations or multi-step solutions. Focus on practical, testable React and Node.js topics.
 
-    // Return ONLY a valid JSON array with this exact structure:
-    // [
-    //   {
-    //     "id": "q1",
-    //     "text": "question text here",
-    //     "difficulty": "easy",
-    //     "timeLimit": 20
-    //   }
-    // ]
+    Return ONLY a valid JSON array with this exact structure:
+    [
+      {
+        "id": "q1",
+        "text": "question text here",
+        "difficulty": "easy",
+        "timeLimit": 20
+      }
+    ]
 
-    // Ensure each question is clear and concise.`
-    //       },
-    //       {
-    //         role: "user",
-    //         content: `Generate 6 interview questions for ${candidateName} focusing on React and Node.js development.`,
-    //       },
-    //     ],
-    //     temperature: 0.8,
-    //     max_tokens: 1000,
-    //   })
+    Ensure each question is clear and concise.`
+        },
+        {
+          role: "user",
+          content: `Generate 6 interview questions for ${candidateName} focusing on React and Node.js development.`,
+        },
+      ],
+      temperature: 0.8,
+      max_tokens: 1000,
+    })
 
-    //   const content = completion.choices[0]?.message?.content
-    //   if (!content) {
-    //     throw new Error("No content received from OpenAI")
-    //   }
+    const content = completion.choices[0]?.message?.content
+    if (!content) {
+      throw new Error("No content received from OpenAI")
+    }
 
-    //   const questions: Question[] = JSON.parse(content)
+    const questions: Question[] = JSON.parse(content)
 
-    //   const validatedQuestions = questions.map((q, index) => ({
-    //     id: q.id || `q${index + 1}`,
-    //     text: q.text,
-    //     difficulty: q.difficulty as "easy" | "medium" | "hard",
-    //     timeLimit: q.timeLimit,
-    //   }))
+    const validatedQuestions = questions.map((q, index) => ({
+      id: q.id || `q${index + 1}`,
+      text: q.text,
+      difficulty: q.difficulty as "easy" | "medium" | "hard",
+      timeLimit: q.timeLimit,
+    }))
 
     return NextResponse.json({ questions: getFallbackQuestions() })
-    // return NextResponse.json({ questions: validatedQuestions })
+    return NextResponse.json({ questions: validatedQuestions })
   } catch (error) {
     console.error("Error generating questions:", error)
     return NextResponse.json({ questions: getFallbackQuestions() })

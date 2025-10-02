@@ -63,7 +63,7 @@ export function ResumeUpload() {
       const formData = new FormData()
       formData.append("resume", file)
 
-      const response = await fetch("/api/parse-resume", {
+      const response = await fetch("/api/parse-doc-ai", {
         method: "POST",
         body: formData,
       })
