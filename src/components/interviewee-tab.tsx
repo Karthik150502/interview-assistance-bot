@@ -37,7 +37,7 @@ export function IntervieweeTab() {
 
   useEffect(() => {
     scrollToBottom()
-  }, [currentCandidate])
+  }, [])
 
   useEffect(() => {
     if (!currentCandidate) {

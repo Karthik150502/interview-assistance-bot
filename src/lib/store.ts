@@ -229,7 +229,7 @@ export const useInterviewStore = create<InterviewState>()(
       },
     }),
     {
-      name: "interview-storage",
+      name: `${process.env.NODE_ENV}-interview-storage`,
     },
   ),
 )
