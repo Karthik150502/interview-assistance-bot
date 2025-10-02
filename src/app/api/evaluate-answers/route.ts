@@ -64,7 +64,7 @@ Return your response in this EXACT Json format, strictly don't include any bad c
 
     return NextResponse.json({
       score: evaluation.score,
-      summary: JSON.stringify(evaluation.summary),
+      summary: evaluation.summary,
     })
   } catch (error) {
     console.error("Error evaluating answers:", error)

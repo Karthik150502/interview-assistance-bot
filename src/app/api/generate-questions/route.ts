@@ -63,7 +63,6 @@ export async function POST(request: NextRequest) {
       timeLimit: q.timeLimit,
     }))
 
-    return NextResponse.json({ questions: getFallbackQuestions() })
     return NextResponse.json({ questions: validatedQuestions })
   } catch (error) {
     console.error("Error generating questions:", error)
