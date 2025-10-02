@@ -172,6 +172,7 @@ export const useInterviewStore = create<InterviewState>()(
       completeInterview: (score, summary) => {
         set((state) => {
           if (!state.currentCandidate) return state
+
           const completedCandidate: Candidate = {
             ...state.currentCandidate,
             score,
