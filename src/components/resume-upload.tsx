@@ -7,6 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { useInterviewStore } from "@/lib/store"
 import { Upload, Loader2 } from "lucide-react"
 
@@ -20,6 +29,19 @@ export function ResumeUpload() {
     email: "",
     phone: "",
   })
+  const [alertDialog, setAlertDialog] = useState<{
+    open: boolean
+    title: string
+    description: string
+  }>({
+    open: false,
+    title: "",
+    description: "",
+  })
+
+  const showAlert = (title: string, description: string) => {
+    setAlertDialog({ open: true, title, description })
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedFile = e.target.files?.[0]
@@ -27,7 +49,7 @@ export function ResumeUpload() {
       if (selectedFile.type === "application/pdf" || selectedFile.name.endsWith(".docx")) {
         setFile(selectedFile)
       } else {
-        alert("Please upload a PDF or DOCX file")
+        showAlert("Invalid File Type", "Please upload a PDF or DOCX file")
       }
     }
   }
@@ -41,7 +63,7 @@ export function ResumeUpload() {
       const formData = new FormData()
       formData.append("resume", file)
 
-      const response = await fetch("/api/parse-doc-ai", {
+      const response = await fetch("/api/parse-resume", {
         method: "POST",
         body: formData,
       })
@@ -61,7 +83,7 @@ export function ResumeUpload() {
         createCandidate(data.name || "", data.email || "", data.phone || "", file.name)
       }
     } catch (error) {
-      alert("Error processing resume. Please enter your details manually.")
+      showAlert("Processing Error", "Error processing resume. Please enter your details manually.")
       setManualEntry(true)
     } finally {
       setIsProcessing(false)
@@ -70,7 +92,7 @@ export function ResumeUpload() {
 
   const handleManualSubmit = () => {
     if (!formData.name || !formData.email || !formData.phone) {
-      alert("Please fill in all fields")
+      showAlert("Missing Information", "Please fill in all fields")
       return
     }
 
@@ -86,90 +108,118 @@ export function ResumeUpload() {
     (currentCandidate && (!currentCandidate.name || !currentCandidate.email || !currentCandidate.phone))
   ) {
     return (
-      <Card className="max-w-md mx-auto">
-        <CardHeader>
-          <CardTitle>Complete Your Information</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="John Doe"
-            />
-          </div>
+      <>
+        <Card className="max-w-md mx-auto">
+          <CardHeader>
+            <CardTitle>Complete Your Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name *</Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="John Doe"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              placeholder="john@example.com"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="john@example.com"
+              />
+            </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number *</Label>
-            <Input
-              id="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              placeholder="+1 234 567 8900"
-            />
-          </div>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number *</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="+1 234 567 8900"
+              />
+            </div>
 
-          <Button onClick={handleManualSubmit} className="w-full">
-            Continue
-          </Button>
-        </CardContent>
-      </Card>
+            <Button onClick={handleManualSubmit} className="w-full">
+              Continue
+            </Button>
+          </CardContent>
+        </Card>
+
+        <AlertDialog open={alertDialog.open} onOpenChange={(open) => setAlertDialog({ ...alertDialog, open })}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{alertDialog.title}</AlertDialogTitle>
+              <AlertDialogDescription>{alertDialog.description}</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction>OK</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>
     )
   }
 
   return (
-    <Card className="max-w-md mx-auto">
-      <CardHeader>
-        <CardTitle>Upload Your Resume</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="border-2 border-dashed border-border rounded-lg p-8 text-center space-y-4">
-          <Upload className="h-12 w-12 mx-auto text-muted-foreground" />
-          <div>
-            <p className="text-sm text-muted-foreground mb-2">Upload your resume (PDF or DOCX)</p>
-            <Input type="file" accept=".pdf,.docx" onChange={handleFileChange} className="cursor-pointer" />
+    <>
+      <Card className="max-w-md mx-auto">
+        <CardHeader>
+          <CardTitle>Upload Your Resume</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="border-2 border-dashed border-border rounded-lg p-8 text-center space-y-4">
+            <Upload className="h-12 w-12 mx-auto text-muted-foreground" />
+            <div>
+              <p className="text-sm text-muted-foreground mb-2">Upload your resume (PDF or DOCX)</p>
+              <Input type="file" accept=".pdf,.docx" onChange={handleFileChange} className="cursor-pointer" />
+            </div>
+            {file && <p className="text-sm text-primary">Selected: {file.name}</p>}
           </div>
-          {file && <p className="text-sm text-primary">Selected: {file.name}</p>}
-        </div>
 
-        <Button onClick={handleUpload} disabled={!file || isProcessing} className="w-full">
-          {isProcessing ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
-            </>
-          ) : (
-            "Upload & Continue"
-          )}
-        </Button>
+          <Button onClick={handleUpload} disabled={!file || isProcessing} className="w-full">
+            {isProcessing ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Processing...
+              </>
+            ) : (
+              "Upload & Continue"
+            )}
+          </Button>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t" />
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">Or</span>
+            </div>
           </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">Or</span>
-          </div>
-        </div>
 
-        <Button variant="outline" onClick={() => setManualEntry(true)} className="w-full">
-          Enter Details Manually
-        </Button>
-      </CardContent>
-    </Card>
+          <Button variant="outline" onClick={() => setManualEntry(true)} className="w-full">
+            Enter Details Manually
+          </Button>
+        </CardContent>
+      </Card>
+
+      <AlertDialog open={alertDialog.open} onOpenChange={(open) => setAlertDialog({ ...alertDialog, open })}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{alertDialog.title}</AlertDialogTitle>
+            <AlertDialogDescription>{alertDialog.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }
