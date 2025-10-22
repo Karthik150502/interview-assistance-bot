@@ -16,6 +16,7 @@ Analyze the provided resume text and extract the following information:
 - Full name of the candidate
 - Email address
 - Phone number
+- The most important 2 skills of the person
 
 Use your understanding of resume layouts, context clues, and common patterns to accurately identify this information.
 Handle various formats including:
@@ -25,8 +26,8 @@ Handle various formats including:
 - International phone number formats
 - Multiple contact methods
 
-Return ONLY a valid JSON object with exactly these fields: name, email, phone
-If information is not found, use "Unknown" for name and empty string "" for email/phone.
+Return ONLY a valid JSON object with exactly these fields: name, email, phone, skills
+If information is not found, use "Unknown" for name, empty string "" for email/phone and empty array ([]) for skills.
 Do not include markdown, explanations, or any text outside the JSON object.`,
             },
             {

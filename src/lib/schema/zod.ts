@@ -17,8 +17,15 @@ export const UserDetailsSchema = z.object({
         .trim()
         .regex(/^[+\d\s\-().]*$/, { message: "Phone contains invalid characters" })
         .refine((s) => {
-            // count digits only (strip spaces, punctuation)
             const digits = s.replace(/\D/g, "");
             return digits.length >= 7 && digits.length <= 15;
         }, { message: "Phone must contain 7 to 15 digits" }),
-}).strict(); // disallow unknown keys
+
+    skills: z
+        .string()
+        .trim()
+        .regex(/^[A-Za-z\s,.\-\/]+$/, {
+            message: "Skills can only contain letters, commas, spaces, periods, hyphens, and slashes"
+        })
+        .min(2, { message: "Skills must be at least 2 characters" }),
+}).strict();

@@ -2,7 +2,7 @@ import type { Candidate } from "@/lib/store"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { ChatMessage } from "@/components/chat-message"
-import { Mail, Phone, FileText, Calendar, Clock } from "lucide-react"
+import { Mail, Phone, FileText, Calendar, Clock, ToolCaseIcon } from "lucide-react"
 
 interface CandidateDetailsProps {
   candidate: Candidate
@@ -52,6 +52,13 @@ export function CandidateDetails({ candidate }: CandidateDetailsProps) {
                 <FileText className="h-4 w-4 text-muted-foreground" />
                 <span className="text-muted-foreground">Resume:</span>
                 <span>{candidate.resumeFileName}</span>
+              </div>
+            )}
+            {candidate.skills && (
+              <div className="flex items-center gap-2 text-sm">
+                <ToolCaseIcon className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">Skills:</span>
+                <span>{candidate.skills.join(", ")}</span>
               </div>
             )}
           </div>

@@ -122,7 +122,8 @@ export function IntervieweeTab() {
     const results = UserDetailsSchema.safeParse({
       name: currentCandidate.name,
       email: currentCandidate.email,
-      phone: currentCandidate.phone
+      phone: currentCandidate.phone,
+      skills: currentCandidate.skills.join(", ")
     });;
 
     if (!results.success) {
@@ -142,6 +143,7 @@ export function IntervieweeTab() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           candidateName: currentCandidate.name,
+          candidateSkills: currentCandidate.skills
         }),
       })
 
@@ -286,6 +288,9 @@ export function IntervieweeTab() {
             <p className="text-sm text-muted-foreground">
               <strong>Phone:</strong> {currentCandidate.phone}
             </p>
+            <p className="text-sm text-muted-foreground">
+              <strong>Skills:</strong> {currentCandidate.skills.join(", ")}
+            </p>
           </div>
           <Editdetails
             setOpenModal={showEditDetailsModal}
@@ -293,10 +298,12 @@ export function IntervieweeTab() {
             values={{
               name: currentCandidate.name,
               email: currentCandidate.email,
-              phone: currentCandidate.phone
+              phone: currentCandidate.phone,
+              skills: currentCandidate.skills.join(", ")
             }}
             updateCandidate={(values: z.infer<typeof UserDetailsSchema>) => {
-              updateCandidateInfo(values.name, values.email, values.phone)
+              const skills = values.skills.split(", ");
+              updateCandidateInfo(values.name, values.email, values.phone, skills)
             }}
           />
           <div className="bg-muted p-4 rounded-lg space-y-2">
