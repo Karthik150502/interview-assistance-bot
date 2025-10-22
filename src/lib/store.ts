@@ -29,6 +29,7 @@ export interface Candidate {
   name: string
   email: string
   phone: string
+  skills: string[]
   resumeFileName?: string
   messages: Message[]
   questions: Question[]
@@ -47,8 +48,8 @@ interface InterviewState {
   candidates: Candidate[]
 
   // Actions
-  createCandidate: (name: string, email: string, phone: string, resumeFileName?: string) => void
-  updateCandidateInfo: (name: string, email: string, phone: string) => void
+  createCandidate: (candidateDetails: { name: string, email: string, phone: string, skills: string[] }, resumeFileName?: string) => void
+  updateCandidateInfo: (name: string, email: string, phone: string, skills: string[]) => void
   addMessage: (message: Omit<Message, "id" | "timestamp">) => void
   setQuestions: (questions: Question[]) => void
   submitAnswer: (answer: string, timeSpent: number) => void
@@ -68,12 +69,13 @@ export const useInterviewStore = create<InterviewState>()(
       currentCandidate: null,
       candidates: [],
 
-      createCandidate: (name, email, phone, resumeFileName) => {
+      createCandidate: (candidateDetails, resumeFileName) => {
         const candidate: Candidate = {
           id: `candidate-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-          name,
-          email,
-          phone,
+          name: candidateDetails.name,
+          email: candidateDetails.email,
+          phone: candidateDetails.phone,
+          skills: candidateDetails.skills,
           resumeFileName,
           messages: [],
           questions: [],
@@ -89,7 +91,7 @@ export const useInterviewStore = create<InterviewState>()(
         set({ currentCandidate: candidate })
       },
 
-      updateCandidateInfo: (name, email, phone) => {
+      updateCandidateInfo: (name, email, phone, skills) => {
         set((state) => {
           if (!state.currentCandidate) return state
           return {
@@ -98,6 +100,7 @@ export const useInterviewStore = create<InterviewState>()(
               name,
               email,
               phone,
+              skills
             },
           }
         })

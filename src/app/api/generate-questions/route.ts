@@ -8,25 +8,31 @@ const openai = new OpenAI({
 
 export async function POST(request: NextRequest) {
   try {
-    const { candidateName } = await request.json()
+    const { candidateName, candidateSkills } = await request.json()
 
     if (!process.env.OPENAI_API_KEY) {
       console.warn("OPENAI_API_KEY not configured, using fallback questions")
       return NextResponse.json({ questions: getFallbackQuestions() })
     }
 
+    const skills = candidateSkills.join(" and ");
+
+    console.log({
+      skills
+    })
+
     const completion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content: `You are an expert technical interviewer specializing in React and Node.js.
+          content: `You are an expert technical interviewer specializing in ${skills}.
     Generate 6 coding interview questions with the following distribution:
     - 2 Easy questions (20 seconds each) - Basic concepts (One Line or Word Answers)
     - 2 Medium questions (60 seconds each) - Intermediate concepts (One Line or Word Answers)
     - 2 Hard questions (120 seconds each) - Advanced concepts (One Liner or Pratical Questions)
 
-    The questions must be designed so that the answer can be given in **one line or a single word**. Avoid long explanations or multi-step solutions. Focus on practical, testable React and Node.js topics.
+    The questions must be designed so that the answer can be given in **one line or a single word**. Avoid long explanations or multi-step solutions. Focus on practical, testable ${skills} topics.
 
     Return ONLY a valid JSON array with this exact structure:
     [
@@ -42,7 +48,7 @@ export async function POST(request: NextRequest) {
         },
         {
           role: "user",
-          content: `Generate 6 interview questions for ${candidateName} focusing on React and Node.js development.`,
+          content: `Generate 6 interview questions for ${candidateName} focusing on ${skills} development.`,
         },
       ],
       temperature: 0.8,

@@ -20,6 +20,7 @@ import {
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -45,6 +46,7 @@ export function ResumeUpload() {
       name: "",
       email: "",
       phone: "",
+      skills: ""
     }
   });
   const [alertDialog, setAlertDialog] = useState<{
@@ -90,11 +92,11 @@ export function ResumeUpload() {
       const data = await response.json()
 
       if (data.name && data.email && data.phone) {
-        createCandidate(data.name, data.email, data.phone, file.name)
+        createCandidate({ name: data.name, email: data.email, phone: data.phone, skills: data.skills }, file.name)
       } else {
         // Missing info, show manual entry
         setManualEntry(true)
-        createCandidate(data.name || "", data.email || "", data.phone || "", file.name)
+        createCandidate({ name: data.name || "", email: data.email || "", phone: data.phone || "", skills: data.skills || [] }, file.name)
       }
     } catch {
       showAlert("Processing Error", "Error processing resume. Please enter your details manually.")
@@ -107,9 +109,11 @@ export function ResumeUpload() {
   const handleManualSubmit = (values: z.infer<typeof UserDetailsSchema>) => {
     startTransition(() => {
       if (currentCandidate) {
-        updateCandidateInfo(values.name, values.email, values.phone)
+        const skills = values.skills.split(", ");
+        updateCandidateInfo(values.name, values.email, values.phone, skills)
       } else {
-        createCandidate(values.name, values.email, values.phone)
+        const skills = values.skills.split(", ");
+        createCandidate({ name: values.name, email: values.email, phone: values.phone, skills })
       }
     });
   }
@@ -186,6 +190,28 @@ export function ResumeUpload() {
                             />
                           </div>
                         </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="skills"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Skills</FormLabel>
+                        <FormControl>
+                          <div className='w-full bg-red h-full relative'>
+                            <Input
+                              {...field}
+                              disabled={isPending}
+                              type={"text"}
+                              placeholder="Python, NodeJs"
+                            />
+                          </div>
+                        </FormControl>
+                        <FormDescription>The questions in the interview will be based on the the skills you have provided above.</FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}

@@ -13,6 +13,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import {
     Form,
     FormControl,
+    FormDescription,
     FormField,
     FormItem,
     FormLabel,
@@ -32,7 +33,8 @@ export default function Editdetails({
     values: {
         name: string,
         email: string,
-        phone: string
+        phone: string,
+        skills: string
     },
     updateCandidate: (values: z.infer<typeof UserDetailsSchema>) => void,
     openModal: boolean,
@@ -123,6 +125,28 @@ export default function Editdetails({
                                             />
                                         </div>
                                     </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+
+                        <FormField
+                            control={form.control}
+                            name="skills"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Skills</FormLabel>
+                                    <FormControl>
+                                        <div className='w-full bg-red h-full relative'>
+                                            <Input
+                                                {...field}
+                                                disabled={isPending}
+                                                type={"text"}
+                                                placeholder="Python, NodeJs"
+                                            />
+                                        </div>
+                                    </FormControl>
+                                    <FormDescription>The questions in the interview will be based on the the skills you have provided above.</FormDescription>
                                     <FormMessage />
                                 </FormItem>
                             )}
